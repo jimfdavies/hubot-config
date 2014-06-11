@@ -1,17 +1,8 @@
 # Description:
-#   Print out a calendar
-#
-# Dependencies:
-#   None
-#
-# Configuration:
-#   None
+#   Prints out this month's ASCII calendar.
 #
 # Commands:
-#   hubot calendar me
-#
-# Author:
-#   Jim Davies
+#   hubot calendar [me] - Print out this month's calendar
 
 child_process = require('child_process')
 module.exports = (robot) ->
