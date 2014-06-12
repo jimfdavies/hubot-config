@@ -1,25 +1,31 @@
 # Description:
-#   Allows Hubot to search a Graphite server for saved graphs
+#   Allows Hubot to search for and show hostedgraphite.com saved graphs
 #
 # Dependencies:
 #   None
 #
 # Configuration
-#   GRAPHITE_URL (e.g. https://graphite.example.com)
-#   GRAPHITE_PORT (e.g. 8443)
-#   GRAPHITE_AUTH (e.g. user:password for Basic Auth)
+#   HOSTEDGRAPHITE_ACCESS_URL (e.g. https://www.hostedgraphite.com/xxx/yyy/graphite)
 #
 # Commands:
 #   graphite list - list all available graphs
 #   graphite search <string> - search for graph by name
 #   graphite show <graph.name> - output graph
 #
+# Notes:
+#   1) Sign up for hostedgraphite.com and create a 'read-only access URL' via the
+#      accounts page.
+#   2) HipChat has a 500 character limit on image URLs, meaning that crazy long
+#      graphite render URLs won't load image previews.
+#
 # Authors:
 #   obfuscurity
 #   spajus
+#   ampledata
+#
+
 
 module.exports = (robot) ->
-
   robot.hear /graphite list/i, (msg) ->
     treeversal msg, (data) ->
       output = ""
@@ -30,25 +36,21 @@ module.exports = (robot) ->
       output = ""
       output += "#{human_id(metric)}\n" for metric in data
       msg.send output
-  robot.hear /graphite show (.+)$/i, (msg) ->
+  robot.hear /graphite show (\S+)/i, (msg) ->
     treeversal msg, (data) ->
       construct_url msg, data[0].graphUrl, (url) ->
         msg.send url
+
 
 construct_url = (msg, graphUrl, cb) ->
   graphRegex = /(\bhttps?:\/\/)(\S+)(\/render\/\S+)$/
   serverRegex = /(\bhttps?:\/\/)(\S+)$/
   uri = graphUrl.match(graphRegex)[3]
-  proto = process.env.GRAPHITE_URL.match(serverRegex)[1]
-  server = process.env.GRAPHITE_URL.match(serverRegex)[2]
-  port = construct_port()
   timestamp = '#' + new Date().getTime()
-  suffix = '&png'
-  if process.env.GRAPHITE_AUTH
-    newUrl = proto + process.env.GRAPHITE_AUTH + '@' + server + port + uri + timestamp + suffix
-  else
-    newUrl = proto + server + port + uri + timestamp + suffix
+  suffix = '&.png'
+  newUrl = process.env.HOSTEDGRAPHITE_ACCESS_URL + uri + timestamp + suffix
   cb(newUrl)
+
 
 treeversal = (msg, cb, node="") ->
   data = []
@@ -59,13 +61,10 @@ treeversal = (msg, cb, node="") ->
       prefix = node + "*"
     else
       prefix = node + ".*"
-  port = construct_port()
   uri = "/browser/usergraph/?query=#{prefix}&format=treejson&contexts=1&path=#{node}&node=#{node}"
-  auth = 'Basic ' + new Buffer(process.env.GRAPHITE_AUTH).toString('base64') if process.env.GRAPHITE_AUTH
   headers = { Accept: "application/json", 'Content-type': 'application/json' }
-  headers['Authorization'] = auth if auth
   msg
-    .http(process.env.GRAPHITE_URL + port + uri)
+    .http(process.env.HOSTEDGRAPHITE_ACCESS_URL + uri)
     .headers(headers)
     .get() (err, res, body) ->
       unless res.statusCode is 200
@@ -83,15 +82,7 @@ treeversal = (msg, cb, node="") ->
         i++
       cb(data) if data.length > 0
 
+
 human_id = (node) ->
   node.id.replace /\.[a-z0-9]+$/, ".#{node.text}"
-
-construct_port = () ->
-  port = ':'
-  if process.env.GRAPHITE_PORT
-    port += process.env.GRAPHITE_PORT
-  else if process.env.GRAPHITE_URL.match(/https/)
-    port += 443
-  else
-    port += 80
-  port
+  
