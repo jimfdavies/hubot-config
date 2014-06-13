@@ -27,7 +27,7 @@ module.exports = (robot) ->
     opt_from = "&from=-#{fromhrs}hrs"
     opt_width = "&width=#{width}"
     opt_linemode = "&lineMode=#{linemode}"
-    opt_format = "&format=#{format}"
+    opt_format = "&.#{format}"
 
     url = process.env.HOSTEDGRAPHITE_ACCESS_URL + base + opt_target + opt_from + opt_width + opt_linemode + opt_format
     msg.http(url)
