@@ -5,5 +5,5 @@
 # 
 
 module.exports = (robot) ->
-  robot.hear /#sensu/i, (msg) ->
+  robot.hear /(.*)#sensu/i, (msg) ->
     msg.reply "Oh oh."
