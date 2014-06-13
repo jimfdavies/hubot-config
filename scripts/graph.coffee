@@ -16,16 +16,20 @@
 
 module.exports = (robot) ->
   robot.respond /graph me ([^\s]+)/i, (msg) ->
-    metric = msg.match[1]
+    target = msg.match[1]
     fromhrs = msg.match[2] || 3
-    
-    uri = "/render/?_salt=1402587759.714"
-    timestamp = '#' + new Date().getTime()
-    target = "&target=" + metric
-    from = "&from=-" + fromhrs + "hrs"
-    format = "&format=png"
-    suffix = "&.png"
-    url = process.env.HOSTEDGRAPHITE_ACCESS_URL + uri + target + from + suffix
+    width = 600
+    format = "png"
+    linemode = "connected"
+
+    base = "/render/?"
+    opt_target = "target=#{target}"
+    opt_from = "&from=-#{fromhrs}hrs"
+    opt_width = "&width=#{width}"
+    opt_linemode = "&lineMode=#{linemode}"
+    opt_format = "&format=#{format}"
+
+    url = process.env.HOSTEDGRAPHITE_ACCESS_URL + base + opt_target + opt_from + opt_width + opt_linemode + opt_format
     msg.http(url)
       .get() (err, res, body) ->
         if res.statusCode isnt 200
