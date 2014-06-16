@@ -30,13 +30,13 @@ module.exports = (robot) ->
     linemode = "connected"
 
     base = "/render/?"
-    opt_target = "target=#{target}"
+    opt_target = "&target=#{target}"
     opt_from = "&from=-#{fromhrs}hrs"
     opt_width = "&width=#{width}"
     opt_linemode = "&lineMode=#{linemode}"
     opt_format = "&.#{format}"
 
-    url = process.env.HOSTEDGRAPHITE_ACCESS_URL + base + decodeURIComponent(opt_target) + opt_from + opt_width + opt_linemode + opt_format
+    url = process.env.HOSTEDGRAPHITE_ACCESS_URL + base + encodeURI(opt_target) + opt_from + opt_width + opt_linemode + opt_format
     msg.http(url)
       .get() (err, res, body) ->
         switch res.statusCode
