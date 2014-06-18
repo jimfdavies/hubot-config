@@ -24,7 +24,7 @@ getDefinition = (msg, query) ->
           response = "That could mean a few things...\n"
           for r in results.RelatedTopics
             if r.Result
-              response += "#{r.Icon.URL}\n"
+              #response += "#{r.Icon.URL}\n"
               response += "#{r.Text}\n"
 
         when "C" 
