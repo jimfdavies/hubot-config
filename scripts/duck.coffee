@@ -16,8 +16,6 @@
 # juan.ceron@pure360.com (forked from https://gist.github.com/juanmirod/8030118)
 #
 getDefinition = (msg, query) ->
-  if query is robot.name 
-    msg.send "I am #{robot.name}. Here's a list of pretenders..."
   msg.http("http://api.duckduckgo.com/?q=#{query}&format=json&t=hubotscript")
     .get() (err, res, body) ->
       results = JSON.parse body
@@ -39,7 +37,6 @@ getDefinition = (msg, query) ->
           response = "Sorry. I have no idea what you mean. Try Uncle Google (http://www.google.com/#q=#{query})"
 
       msg.send response      
-
       
 module.exports = (robot) ->
   robot.respond /wtf (.*)/i, (msg) ->
